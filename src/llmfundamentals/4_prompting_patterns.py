@@ -1,17 +1,22 @@
-"""
-Prompting patterns
-"""
 import json
+import os
 from pathlib import Path
 
 import anthropic
 from dotenv import load_dotenv
 from loguru import logger
 
-MODEL = "claude-haiku-4-5"
+MODEL = "anthropic/claude-haiku-4.5"
 
 load_dotenv()
-client = anthropic.Anthropic()
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise SystemExit("OPENROUTER_API_KEY is not set (check your .env file)")
+
+client = anthropic.Anthropic(
+    base_url="https://openrouter.ai/api",
+    auth_token=OPENROUTER_API_KEY,
+)
 
 
 def ask(prompt, system=None, max_tokens=300):
@@ -23,7 +28,11 @@ def ask(prompt, system=None, max_tokens=300):
         messages=[{"role": "user", "content": prompt}],
         **kwargs,
     )
-    return response.content[0].text, response.usage.input_tokens, response.usage.output_tokens
+    return (
+        response.content[0].text,
+        response.usage.input_tokens,
+        response.usage.output_tokens,
+    )
 
 
 # Zero-shot: just the instruction, no worked example.
@@ -85,11 +94,15 @@ def main():
     # EXAMPLE
     for name, (system, prompt, max_tokens) in PROMPTS.items():
         text, tokens_in, tokens_out = ask(prompt, system, max_tokens)
-        logger.info("=== {} ({} tokens in, {} tokens out) ===\n{}", name, tokens_in, tokens_out, text)
+        logger.info(
+            "=== {} ({} tokens in, {} tokens out) ===\n{}",
+            name,
+            tokens_in,
+            tokens_out,
+            text,
+        )
 
     # TODO compare the LLM results for the three tasks and different prompting strategies.
-
-    
 
 
 if __name__ == "__main__":

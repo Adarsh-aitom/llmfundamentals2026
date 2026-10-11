@@ -27,8 +27,11 @@ def main():
     # response.usage.input_tokens gives the number of input tokens
     # response.usage.output_tokens gives the number of output tokens
     logger.info(response.content[0].text)
-    return response.content[0].text, response.usage.input_tokens, response.usage.output_tokens
-
+    return (
+        response.content[0].text,
+        response.usage.input_tokens,
+        response.usage.output_tokens,
+    )
 
 
 if __name__ == "__main__":

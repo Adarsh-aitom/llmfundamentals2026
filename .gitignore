@@ -14,4 +14,7 @@ wheels/
 
 # Local folders
 local/
+**/.DS_Store
+
+src/llmfundamentals/scripts_corrected/*.csv
 

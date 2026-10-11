@@ -24,3 +24,7 @@ uv add loguru
 uv add dotenv
 uv add --dev ruff
 ```
+
+## Set-up
+
+Create a .env file at the folder root and write the value of your OPENROUTER_API_KEY (see example in .env.example). Save the file.
