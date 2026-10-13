@@ -24,7 +24,9 @@ class LLMResponse:
     text: str
     input_tokens: int
     output_tokens: int
+#    cost_usd: float | None  # None when the model's price is unknown # uncomment when you're working on the cost
     stop_reason: str | None = None  # e.g. "end_turn" or "max_tokens" (Claude), "stop" or "length" (OpenAI)
+ #   latency_seconds: float | None = None  # wall-clock time of ask(), including retries # uncomment when you're working on the latency
 
 
 class LLMWrapper:
@@ -82,21 +84,12 @@ class LLMWrapper:
         )
 
     def _ask_openai(self, prompt: str, system: str | None) -> LLMResponse:
-        messages = []
-        if system:
-            messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": prompt})
-        response = self._openai.chat.completions.create(
-            model=self.model,
-            max_completion_tokens=self.max_tokens,
-            messages=messages,
-        )
-        choice = response.choices[0]
+        # TODO implement function
         return LLMResponse(
-            text=choice.message.content or "",
-            input_tokens=response.usage.prompt_tokens,
-            output_tokens=response.usage.completion_tokens,
-            stop_reason=choice.finish_reason,
+            text="",
+            input_tokens=0,
+            output_tokens=0,
+            stop_reason="",
         )
 
 
