@@ -1,6 +1,7 @@
 """
 Prompting patterns
 """
+import os
 import json
 from pathlib import Path
 
@@ -8,10 +9,17 @@ import anthropic
 from dotenv import load_dotenv
 from loguru import logger
 
-MODEL = "claude-haiku-4-5"
+MODEL = "anthropic/claude-haiku-4.5"
 
 load_dotenv()
-client = anthropic.Anthropic()
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise SystemExit("OPENROUTER_API_KEY is not set (check your .env file)")
+
+client = anthropic.Anthropic(
+    base_url="https://openrouter.ai/api",
+    auth_token=OPENROUTER_API_KEY,
+)
 
 
 def ask(prompt, system=None, max_tokens=300):
@@ -82,12 +90,23 @@ STY = load("style")
 
 
 def main():
-    # EXAMPLE
+    # EXAMPLE with hardcoded prompts
+    logger.info("\n=== Testing prompting strategies on hardcoded examples ===")
     for name, (system, prompt, max_tokens) in PROMPTS.items():
         text, tokens_in, tokens_out = ask(prompt, system, max_tokens)
         logger.info("=== {} ({} tokens in, {} tokens out) ===\n{}", name, tokens_in, tokens_out, text)
 
-    # TODO compare the LLM results for the three tasks and different prompting strategies.
+    # Compare across datasets
+    logger.info("\n=== Comparing prompting strategies across datasets ===")
+    datasets = {"classification": CLS, "arithmetic": ARI, "style": STY}
+
+    for dataset_name, dataset in datasets.items():
+        logger.info("\n--- {} ({}): {} ---", dataset_name, dataset["name"], dataset["type"])
+        results = test_dataset(dataset, list(PROMPTS.keys()))
+
+        for strategy, metrics in results.items():
+            logger.info("{}: {}/{} correct ({:.1f}% accuracy)",
+                       strategy, metrics["correct"], metrics["total"], metrics["accuracy"])
 
     
 
